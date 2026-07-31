@@ -39,6 +39,10 @@ The adjudicator's single highest-priority action was: read the full text of Lath
 
 **Single biggest risk:** the criterion resolves to a trivially wide margin everywhere, including in stagnant regimes, making the result true but uninteresting ("we confirmed the obvious with dimensional analysis"). Mitigation if this happens: abandon the inversion and fall back to gap-register row 11 (Mars ISRU-water mineral-scale prediction via PHREEQC — high tractability, well-posed non-gravity-dependent aqueous thermodynamics) rather than publish a trivial result. That fallback is itself explicitly **unvetted** — the adjudicator ran only one confirmatory search on it — and would need its own adjudication pass before selection.
 
-## 5. Runners-up and why they lost
+## 5. Individual spare-money fundability check
+
+Standing constraint added mid-checkpoint: any physical validation must be affordable out of an individual engineer's personal spare money, not dependent on institutional facilities or budget (cheap workarounds to an otherwise-expensive investigation remain fair game — this doesn't blanket-exclude a phenomenon, only investigations with no affordable path to evidence). Full reasoning in `decision_log.md`. This problem passes: the core contribution is pure dimensional analysis and a 1-D transport model validated against already-published secondary data (zero marginal cost); the optional sanity-check bench culture is a few-hundred-dollar personal expense and is explicitly non-load-bearing. Both rejected finalists (B: needs a controlled elevated-O2 ignition chamber; C: needs parabolic-flight or centrifuge access) would have failed this bar independently of their novelty problems — a useful cross-check that the adjudication and this constraint converge rather than conflict.
+
+## 6. Runners-up and why they lost
 
 Full detail in `novelty_adjudication.md`. In brief: Candidate B (flammability) and Candidate C (two-phase heat transfer) are rejected outright, not merely ranked below the winner — both have real, disqualifying, actively-published prior art at essentially the exact scope proposed. They are not held as fallbacks.
