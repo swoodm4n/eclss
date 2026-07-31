@@ -27,3 +27,29 @@ Append-only. Each entry: date, phase, decision, alternatives considered, rationa
 **Confidence:** High on track/venue identity and the closed 55th-cycle facts (well corroborated). Low on exact 56th-cycle deadlines (not yet published anywhere) — treated as a placeholder, explicitly not to be relied on for an actual submission without re-verification.
 
 ---
+
+## 2026-07-31 — Phase 1 — Gap register: cross-cutting convergence noted, methodology risk flagged
+
+**Decision:** Consolidate 48 candidate gaps from 8 independent Haiku subsystem surveys into `gap_register.md`; carry 3 diverse finalists to Phase 2 Opus adjudication rather than the single top-scored row, to avoid over-indexing on one subsystem agent's self-calibrated scoring.
+
+**Notable finding:** 4 of 8 independently-run surveys (water recovery, waste management, system integration, monitoring) converged unprompted on partial-gravity biofilm/microbial dynamics as a top gap. Logged as a two-edged signal at the time: real relevance vs. a well-populated field the searches might not be seeing all of. This caveat turned out to be correct and under-weighted — see the next entry.
+
+**Confidence:** Medium — flagged explicitly that the survey methodology (search scoped to NTRS/ICES/arXiv) could not rule out prior art the searches didn't reach.
+
+---
+
+## 2026-07-31 — Phase 2 — All 3 finalists rejected by adversarial novelty adjudication; problem reselected via reframe
+
+**Decision:** Reject Candidates A (partial-gravity microbial/biofilm kinetics), B (combined-stressor material flammability), and C (fractional-gravity two-phase heat transfer) as originally framed. Select an inverted reframe of Candidate A — a dimensionless criterion for *when* gravity-driven transport is negligible vs. first-order for microbial/biofilm processes in pumped ECLSS water loops — as the provisional problem. Full reasoning in `problem_statement.md` and `novelty_adjudication.md`.
+
+**Alternatives considered:** All 48 rows of `gap_register.md` were in scope; the adjudicator additionally proposed gap-register row 11 (Mars ISRU-water mineral-scale prediction) as an explicitly-unvetted fallback if the reframe fails its own trivial-result risk (see below).
+
+**Rationale:** An Opus subagent ran ~33 adversarial searches specifically trying to disprove each finalist's novelty and found real, disqualifying prior art for all three — not absence-of-evidence, but positive findings: NASA WSTF combined O2×pressure flammability data since 2007 (kills B), a 2004 Froude-number scaling law for two-phase flow at Mars/Moon gravity plus an active 20-year subfield (kills C), and three independent NASA Ames modeling efforts plus a May 2026 bioRxiv preprint plus an ESA flight experiment showing a null gravity effect (kills A as originally framed). All three failures trace to the same cause: Phase 1's searches were scoped to NTRS/ICES/arXiv, and the disqualifying prior art sat in ASME/Elsevier journals, WSTF reports, and bioRxiv — outside that scope. **Methodology lesson logged for Phase 3 onward: do not trust a clean NTRS/ICES-only search as evidence of novelty for any future claim in this program.**
+
+The inverted framing of A survives because it treats the prior art as input/validation data rather than a competing result, borrows a contribution *form* (Konishi/Mudawar/Hasan's "criteria for negating gravity's influence," 2013) that is precedented in the adjacent two-phase-flow field but not yet made on the microbial/biofilm side, and requires no new facilities.
+
+**Confidence:** Medium (adjudicator's explicit assessment, adopted). Named risk: the criterion may resolve to a trivially wide margin everywhere and read as confirming the obvious — mitigated by scoping to stagnant/dormancy regimes where the margin is genuinely narrow, with an explicit fallback (unvetted) to gap-register row 11 if that risk materializes.
+
+**Outstanding blocker, logged rather than silently worked around:** the adjudicator's top-priority next action — read the full text of the Latham/Skountzos/Lawson bioRxiv preprint before fully committing — cannot be executed in this sandbox. Confirmed directly: `WebFetch` returns HTTP 403 (proxy policy denial, not a site-side block) for `biorxiv.org`, `ntrs.nasa.gov`, `ices.space`, and `arxiv.org` alike. `WebSearch` still functions and is how every citation in this program has been sourced, but no scholarly primary source is currently readable in full — every content claim in this program to date is search-snippet fidelity, not read-the-source fidelity. This is raised at the Kickoff Mode checkpoint as a question for the human rather than proceeding past it silently, per the program's integrity rules on uncertainty and per the general principle that an infrastructure limitation blocking further verification is exactly the kind of thing worth a human's attention before committing further compute.
+
+---
