@@ -67,3 +67,15 @@ The inverted framing of A survives because it treats the prior art as input/vali
 **Confidence:** High that the currently selected problem satisfies this constraint as scoped. This constraint will be re-applied at Phase 6 when the actual `/validation/README.md` and `bom.csv` are drafted, since that is where a violation would concretely surface.
 
 ---
+
+## 2026-07-31 — HARD STOP — account monthly spend limit reached
+
+**Event:** The Phase 3 first-principles derivation subagent (Opus, tasked with deriving the gravity-relevance dimensionless criterion and the ADR transport model) failed mid-run with: "Agent terminated early due to an API error: You've hit your monthly spend limit." This is a billing/quota condition on the account, not a defect in the task or the agent's approach — the agent had reportedly finished parameter research and was about to compute criterion values when it was killed.
+
+**Action taken:** Stopped rather than retrying. Per program rule §8, a step that would spend real money — or in this case, one the account's spend cap says has already spent too much — is an explicit hard-stop condition requiring the human, not a decision to make autonomously. Did not attempt further Agent spawns (Opus or otherwise) to avoid running against a cap that is already exceeded.
+
+**State at stop:** Phases 0–2 complete and pushed (target track/facts, gap register, adversarial novelty adjudication, provisional problem statement, individual-fundability check). Phase 3 (first-principles derivation + code) has not produced any output yet — no derivation document exists, no model code has been written. Python environment is scaffolded and ready (`requirements.txt` pinned, installed in `.venv`, `.gitignore` in place) so implementation can start immediately once derivation work resumes.
+
+**Open question for the human:** raise the spend limit (claude.ai/settings/usage) to continue, or hold here until it resets.
+
+---
