@@ -1,5 +1,11 @@
 """Monte Carlo uncertainty propagation. derivation.md §7.3(b), §9.9.
 
+CORRECTED (Phase 4 red-team, redteam_report.md Finding 4.9): reports per-branch (single-cell
+diffusion-branch vs floc interception-branch) statistics, not a combined mixture median/interval.
+The original combined "median 0.154 g_E, 90% interval [1.2e-4, 1.44] g_E" landed in the empty
+valley of a bimodal distribution where no actual sample sits (visible as a dip in the histogram)
+and is not a meaningful summary of either population.
+
 Produces:
   results/figures/fig5_monte_carlo_g_star.png
   results/data/monte_carlo_g_star.csv
@@ -32,54 +38,59 @@ def main():
     result = uncertainty.monte_carlo_g_star(r1.Q, r1.L, n_samples=N_SAMPLES, seed=uncertainty.RNG_SEED)
 
     g_star_over_gE = result.g_star / constants.G_EARTH
-    finite = np.isfinite(g_star_over_gE)
-    p5, p50, p95 = np.percentile(g_star_over_gE[finite], [5, 50, 95])
-
-    p_dominant_mars = (result.Ga_dep_at_mars > 1).mean()
-    p_dominant_moon = (result.Ga_dep_at_moon > 1).mean()
-    p_dominant_earth = (result.Ga_dep_at_earth > 1).mean()
-
-    summary = {
-        "n_samples": N_SAMPLES,
-        "seed": uncertainty.RNG_SEED,
-        "g_star_p5_over_gE": p5,
-        "g_star_p50_over_gE": p50,
-        "g_star_p95_over_gE": p95,
-        "P_Ga_dep_gt_1_at_Earth": p_dominant_earth,
-        "P_Ga_dep_gt_1_at_Mars": p_dominant_mars,
-        "P_Ga_dep_gt_1_at_Moon": p_dominant_moon,
-    }
-    print(summary)
+    is_large = result.is_large_mode
 
     import pandas as pd
 
-    pd.DataFrame([summary]).to_csv(DATA_DIR / "monte_carlo_g_star_summary.csv", index=False)
+    branch_summaries = []
+    for branch_name, mask in (("single_cell_diffusion_branch", ~is_large), ("floc_interception_branch", is_large)):
+        gvals = g_star_over_gE[mask]
+        finite = np.isfinite(gvals) & (gvals > 0)
+        p5, p50, p95 = np.percentile(gvals[finite], [5, 50, 95])
+        branch_summaries.append({
+            "branch": branch_name, "n_samples": int(mask.sum()),
+            "g_star_p5_over_gE": p5, "g_star_p50_over_gE": p50, "g_star_p95_over_gE": p95,
+            "P_Ga_dep_gt_1_at_Earth": (result.Ga_dep_at_earth[mask] > 1).mean(),
+            "P_Ga_dep_gt_1_at_Mars": (result.Ga_dep_at_mars[mask] > 1).mean(),
+            "P_Ga_dep_gt_1_at_Moon": (result.Ga_dep_at_moon[mask] > 1).mean(),
+        })
+    summary_df = pd.DataFrame(branch_summaries)
+    print(summary_df.to_string(index=False))
+    summary_df.to_csv(DATA_DIR / "monte_carlo_g_star_summary.csv", index=False)
+
     pd.DataFrame({
         "d_um": result.d * 1e6, "delta_rho": result.delta_rho, "D_tube_mm": result.D_tube * 1e3,
-        "T_K": result.T_K, "g_star_over_gE": g_star_over_gE,
+        "T_K": result.T_K, "is_large_mode": result.is_large_mode, "g_star_over_gE": g_star_over_gE,
         "Ga_dep_earth": result.Ga_dep_at_earth, "Ga_dep_mars": result.Ga_dep_at_mars, "Ga_dep_moon": result.Ga_dep_at_moon,
     }).to_csv(DATA_DIR / "monte_carlo_g_star_samples.csv", index=False)
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-    finite_vals = g_star_over_gE[np.isfinite(g_star_over_gE) & (g_star_over_gE > 0)]
-    axes[0].hist(np.log10(finite_vals), bins=60, color="steelblue", alpha=0.8)
-    axes[0].axvline(np.log10(constants.G_MARS / constants.G_EARTH), color="darkorange", ls="--", label="Mars g")
-    axes[0].axvline(np.log10(constants.G_MOON / constants.G_EARTH), color="dimgray", ls="--", label="Moon g")
-    axes[0].axvline(np.log10(p50), color="black", ls="-", lw=1, label=f"median = {p50:.3g} $g_E$")
+    for mask, color, name in ((~is_large, "steelblue", "single cells (diffusion branch)"), (is_large, "darkorange", "flocs (interception branch)")):
+        vals = g_star_over_gE[mask]
+        finite_vals = vals[np.isfinite(vals) & (vals > 0)]
+        axes[0].hist(np.log10(finite_vals), bins=40, color=color, alpha=0.55, label=name, density=True)
+    axes[0].axvline(np.log10(constants.G_MARS / constants.G_EARTH), color="black", ls="--", lw=1, label="Mars g")
+    axes[0].axvline(np.log10(constants.G_MOON / constants.G_EARTH), color="dimgray", ls=":", lw=1, label="Moon g")
     axes[0].set_xlabel(r"$\log_{10}(g^* / g_{Earth})$")
-    axes[0].set_ylabel("Monte Carlo samples")
-    axes[0].set_title(f"$g^*$ distribution (N={N_SAMPLES:,})\n90% interval: [{p5:.3g}, {p95:.3g}] $g_E$")
-    axes[0].legend(fontsize=8)
+    axes[0].set_ylabel("density")
+    axes[0].set_title(f"$g^*$ distribution BY BRANCH (N={N_SAMPLES:,})\n(reported separately -- see redteam_report.md Finding 4.9)")
+    axes[0].legend(fontsize=7)
 
     labels = ["Earth", "Mars", "Moon"]
-    probs = [p_dominant_earth, p_dominant_mars, p_dominant_moon]
-    axes[1].bar(labels, probs, color=["steelblue", "darkorange", "dimgray"])
-    axes[1].set_ylabel(r"P($Ga_{dep} > 1$) across sampled particle population")
-    axes[1].set_title("Probability gravity dominates wall-delivery,\naccounting for size/density/geometry uncertainty")
-    axes[1].set_ylim(0, 1)
-    for i, p in enumerate(probs):
-        axes[1].text(i, p + 0.02, f"{p:.2f}", ha="center")
+    x = np.arange(3)
+    width = 0.35
+    for k, (branch_mask, color, name) in enumerate(((~is_large, "steelblue", "cells"), (is_large, "darkorange", "flocs"))):
+        probs = [(result.Ga_dep_at_earth[branch_mask] > 1).mean(), (result.Ga_dep_at_mars[branch_mask] > 1).mean(), (result.Ga_dep_at_moon[branch_mask] > 1).mean()]
+        bars = axes[1].bar(x + (k - 0.5) * width, probs, width, color=color, label=name)
+        for xi, p in zip(x + (k - 0.5) * width, probs):
+            axes[1].text(xi, p + 0.02, f"{p:.2f}", ha="center", fontsize=8)
+    axes[1].set_xticks(x)
+    axes[1].set_xticklabels(labels)
+    axes[1].set_ylabel(r"P($Ga_{dep} > 1$), by branch")
+    axes[1].set_title("Probability gravity dominates wall-delivery,\nreported per particle-size branch")
+    axes[1].set_ylim(0, 1.15)
+    axes[1].legend(fontsize=8)
 
     fig.tight_layout()
     out = FIG_DIR / "fig5_monte_carlo_g_star.png"

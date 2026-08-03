@@ -7,6 +7,7 @@ Produces:
 """
 
 import sys
+import warnings
 from pathlib import Path
 
 import matplotlib
@@ -32,25 +33,43 @@ T_K = 298.15
 
 
 def fig1_regime_map():
-    """Ga_dep(d, g) and Lambda_g(d, g) contours for the WPA nominal line (R1)."""
+    """Ga_dep(d, g) and Lambda_g(d, g) contours for the WPA nominal line (R1).
+
+    Two Phase-4 red-team corrections applied (redteam_report.md Findings 2.2, 2.8):
+    - delta_rho is now log-interpolated smoothly between the cell and floc nominal values
+      over one octave around 7 um, instead of a hard step -- the original step produced a
+      non-physical kink in the Ga_dep=1 contour (this map is a heuristic single surface across
+      two different particle populations, not a claim that delta_rho truly varies with size).
+    - Points evaluated outside Stokes validity (Re_p > 0.34, mostly large-d/high-g corners)
+      are counted and reported rather than silently accepted; the closed forms still return a
+      value there (biased high) since a full map re-solved with Schiller-Naumann at every grid
+      point is not needed for the qualitative regime picture, but the caveat is not hidden.
+    """
     r1 = hydrodynamics.REGIME_R1_WPA_NOMINAL
     gamma_w, tau_w, _ = hydrodynamics.wall_shear(r1.U, r1.D, RHO_F, MU)
 
     d_vals = np.logspace(np.log10(0.5e-6), np.log10(1000e-6), 150)  # 0.5 to 1000 um
-    g_vals = np.logspace(-6, 1, 150)  # 1e-6 to 10 g_E equivalent in m/s^2... use m/s^2 directly below
     g_vals_ms2 = np.logspace(np.log10(1e-6 * constants.G_EARTH), np.log10(10 * constants.G_EARTH), 150)
 
     Ga = np.zeros((len(g_vals_ms2), len(d_vals)))
     Lam = np.zeros((len(g_vals_ms2), len(d_vals)))
     delta_rho_small = 93.0  # P1 cell nominal
     delta_rho_large = 50.0  # floc nominal
-    a_c_at_R1 = None
-    for i, g in enumerate(g_vals_ms2):
-        for j, d in enumerate(d_vals):
-            a = d / 2.0
-            delta_rho = delta_rho_small if d <= 7e-6 else delta_rho_large
-            Ga[i, j] = criteria.ga_dep_closed_form(a, delta_rho, g, MU, T_K, gamma_w, r1.L, r1.D)
-            Lam[i, j] = criteria.lambda_g(a, delta_rho, g, MU, r1.L, r1.U, r1.D)
+    n_outside_validity = 0
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        for i, g in enumerate(g_vals_ms2):
+            for j, d in enumerate(d_vals):
+                a = d / 2.0
+                # smooth log-space blend over one octave (3.5-14 um) around the 7 um crossover
+                blend = np.clip((np.log(d) - np.log(3.5e-6)) / (np.log(14e-6) - np.log(3.5e-6)), 0.0, 1.0)
+                delta_rho = delta_rho_small * (1 - blend) + delta_rho_large * blend
+                Ga[i, j] = criteria.ga_dep_closed_form(a, delta_rho, g, MU, T_K, gamma_w, r1.L, r1.D)
+                Lam[i, j] = criteria.lambda_g(a, delta_rho, g, MU, r1.L, r1.U, r1.D)
+        n_outside_validity = len(caught)
+    n_total = len(g_vals_ms2) * len(d_vals)
+    print(f"fig1: {n_outside_validity}/{n_total} grid points ({100*n_outside_validity/n_total:.1f}%) "
+          f"outside Stokes validity (Re_p > 0.34); biased high there, mostly large-d/high-g corner.")
 
     fig, axes = plt.subplots(1, 2, figsize=(13, 5.5))
 

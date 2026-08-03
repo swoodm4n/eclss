@@ -5,6 +5,7 @@
 (b) Monte Carlo -- for the uncertainty band on the crossover gravity level g*.
 """
 
+import warnings
 from dataclasses import dataclass
 
 import numpy as np
@@ -59,6 +60,7 @@ class MonteCarloResult:
     delta_rho: np.ndarray
     D_tube: np.ndarray
     T_K: np.ndarray
+    is_large_mode: np.ndarray  # True = floc/interception branch, False = cell/diffusion branch
     g_star: np.ndarray  # crossover gravity level (m/s^2) for Ga_dep = 1
     Ga_dep_at_mars: np.ndarray
     Ga_dep_at_moon: np.ndarray
@@ -81,27 +83,33 @@ def monte_carlo_g_star(Q_flow: float, L: float, n_samples: int = 10_000, seed: i
     Ga_mars = np.empty(n_samples)
     Ga_moon = np.empty(n_samples)
 
-    for i in range(n_samples):
-        mu = constants.water_viscosity(T_K[i])
-        rho_f = constants.water_density(T_K[i])
-        U = bulk_velocity(Q_flow, D_tube[i])
-        gamma_w, tau_w, _ = wall_shear(U, D_tube[i], rho_f, mu)
-        a = d[i] / 2.0
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        for i in range(n_samples):
+            mu = constants.water_viscosity(T_K[i])
+            rho_f = constants.water_density(T_K[i])
+            U = bulk_velocity(Q_flow, D_tube[i])
+            gamma_w, tau_w, _ = wall_shear(U, D_tube[i], rho_f, mu)
+            a = d[i] / 2.0
 
-        g_star_dif = criteria.g_star_dif(a, delta_rho[i], mu, T_K[i], gamma_w, L, D_tube[i])
-        g_star_int = criteria.g_star_int(delta_rho[i], mu, gamma_w, L, D_tube[i])
-        # Ga_dep is the min of the two branches (2.13: k_w = max(k_lev,k_int) -> Ga = min(Ga_dif,Ga_int)),
-        # so the controlling (larger, i.e. later-crossing) threshold is the max of the two g*'s
-        # on the branch that is actually active. We report the diffusion-branch g* when a < a_c
-        # (small mode) and the interception-branch g* otherwise, since that is the branch that
-        # governs at that particle size (derivation.md §3.2).
-        g_star[i] = g_star_dif if not is_large[i] else g_star_int
+            g_star_dif = criteria.g_star_dif(a, delta_rho[i], mu, T_K[i], gamma_w, L, D_tube[i])
+            g_star_int = criteria.g_star_int(delta_rho[i], mu, gamma_w, L, D_tube[i])
+            # Ga_dep is the min of the two branches (2.13: k_w = max(k_lev,k_int) -> Ga = min(Ga_dif,Ga_int)),
+            # so the controlling (larger, i.e. later-crossing) threshold is the max of the two g*'s
+            # on the branch that is actually active. We report the diffusion-branch g* when a < a_c
+            # (small mode) and the interception-branch g* otherwise, since that is the branch that
+            # governs at that particle size (derivation.md §3.2).
+            g_star[i] = g_star_dif if not is_large[i] else g_star_int
 
-        Ga_earth[i] = criteria.ga_dep_closed_form(a, delta_rho[i], constants.G_EARTH, mu, T_K[i], gamma_w, L, D_tube[i])
-        Ga_mars[i] = criteria.ga_dep_closed_form(a, delta_rho[i], constants.G_MARS, mu, T_K[i], gamma_w, L, D_tube[i])
-        Ga_moon[i] = criteria.ga_dep_closed_form(a, delta_rho[i], constants.G_MOON, mu, T_K[i], gamma_w, L, D_tube[i])
+            Ga_earth[i] = criteria.ga_dep_closed_form(a, delta_rho[i], constants.G_EARTH, mu, T_K[i], gamma_w, L, D_tube[i])
+            Ga_mars[i] = criteria.ga_dep_closed_form(a, delta_rho[i], constants.G_MARS, mu, T_K[i], gamma_w, L, D_tube[i])
+            Ga_moon[i] = criteria.ga_dep_closed_form(a, delta_rho[i], constants.G_MOON, mu, T_K[i], gamma_w, L, D_tube[i])
+    n_outside_validity = len(caught)
+    if n_outside_validity:
+        print(f"monte_carlo_g_star: {n_outside_validity} of {2 * n_samples} closed-form calls "
+              f"outside Stokes validity (Re_p > 0.34) -- biased high, mostly large-floc samples.")
 
     return MonteCarloResult(
-        d=d, delta_rho=delta_rho, D_tube=D_tube, T_K=T_K, g_star=g_star,
+        d=d, delta_rho=delta_rho, D_tube=D_tube, T_K=T_K, is_large_mode=is_large, g_star=g_star,
         Ga_dep_at_earth=Ga_earth, Ga_dep_at_mars=Ga_mars, Ga_dep_at_moon=Ga_moon,
     )

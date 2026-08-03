@@ -1,2 +1,3 @@
-n_samples,seed,g_star_p5_over_gE,g_star_p50_over_gE,g_star_p95_over_gE,P_Ga_dep_gt_1_at_Earth,P_Ga_dep_gt_1_at_Mars,P_Ga_dep_gt_1_at_Moon
-10000,20260803,0.0001187275504884572,0.1541000502709079,1.4359737307719251,0.9138,0.7364,0.5188
+branch,n_samples,g_star_p5_over_gE,g_star_p50_over_gE,g_star_p95_over_gE,P_Ga_dep_gt_1_at_Earth,P_Ga_dep_gt_1_at_Mars,P_Ga_dep_gt_1_at_Moon
+single_cell_diffusion_branch,8012,0.09215894157755328,0.7047260848428798,5.191303296778119,0.613954068896655,0.2980529206190714,0.11582626060908637
+floc_interception_branch,1988,0.00015221597741605354,0.0014378743948125178,0.013313846553798787,1.0,1.0,1.0
