@@ -1,0 +1,2 @@
+n_samples,seed,g_star_p5_over_gE,g_star_p50_over_gE,g_star_p95_over_gE,P_Ga_dep_gt_1_at_Earth,P_Ga_dep_gt_1_at_Mars,P_Ga_dep_gt_1_at_Moon
+10000,20260803,0.0001187275504884572,0.1541000502709079,1.4359737307719251,0.9138,0.7364,0.5188
