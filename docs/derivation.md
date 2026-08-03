@@ -4,6 +4,38 @@
 **Date:** 2026-08-03
 **Status:** Derivation complete; ready for implementation. All numerical values below are reproducible from the equations and the parameter table in §8.
 
+> **ERRATUM (Phase 4, added after an independent adversarial red-team review — see
+> `redteam_report.md` and `limitations.md` §2 for the full account).** The physics and algebra
+> below (§§0-8) were independently re-derived and checked and are correct. However, several
+> headline **conclusions** drawn from that correct algebra are wrong or overclaimed as
+> originally stated here, and were corrected in the code (`src/eclss_gravity`) and in
+> `limitations.md`, not in this file's prose:
+> - **§3.5's "strongest single result"** (lowering gravity suppresses convection and increases
+>   net dormancy deposition, illustrated ~10⁵-10⁶× in the original fig3) is **retracted as
+>   stated**. The implementation had omitted the eq. (5.3) biofilm growth term; with it
+>   restored, the long-time dormancy outcome is nearly gravity-independent (growth kinetics
+>   dominate once any deposit seeds), though the deposition *rate* still differs by ~1700x.
+>   Separately, `Ra_c=1708` (§2.2b) requires a vertical destabilizing thermal gradient that a
+>   real spacecraft line will not generically have — this was not stated as an assumption below
+>   and should be read as a significant, not minor, caveat on all of §3.5/§2.2(b).
+> - **§3.2's headline `g* = 0.238 g_E`** is over-precise by roughly 50x across this
+>   document's own assumed-parameter ranges, and is sensitive to a convention choice
+>   (`cos θ=1` vs. the perimeter-averaged `f_θ=1/π` this document itself derives in §5.3 as
+>   correct) that §3.2 did not carry through consistently with §5.3. See `limitations.md` for
+>   the corrected, uncertainty-quantified statement.
+> - **§3.3's `Λ_g` used a channel half-depth (`R=D/2`)** while identifying itself with the
+>   classical Hazen surface-overflow number, which requires the full depth. This changes the
+>   quoted 100 µm floc example (see `limitations.md`; the 183 µm example survives).
+> - **§3.6's novelty anchor (Konishi/Mudawar/Hasan, two-phase flow boiling) is the wrong
+>   field.** The closer, and older, prior art is colloid-filtration theory (Yao/Habibian/
+>   O'Melia 1971; Tufenkji/Elimelech 2004; Pich 1972) — see `problem_statement.md` §7 for the
+>   corrected novelty framing.
+>
+> Treat the equations and parameter values in this document as reliable (they were
+> independently reproduced to within 0.3%); treat any specific headline claim or conclusion
+> sentence as superseded by `limitations.md` and the current code/tests unless you have checked
+> it was not on the list above.
+
 ---
 
 ## 0. Scope, conventions, and an honest statement of source fidelity

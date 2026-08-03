@@ -1,6 +1,6 @@
-# Problem Statement (Provisional — see caveat)
+# Problem Statement
 
-**Status: PROVISIONAL, pending one blocking verification step this sandbox cannot currently clear (see §4).** Presented at the Kickoff Mode checkpoint for a human go/no-go rather than committed to silently, specifically because of that gap.
+**Status update (post-Phase 4):** Phase 3 built the full derivation (`derivation.md`) and working code (`src/eclss_gravity`); Phase 4's adversarial red-team (`redteam_report.md`) then found and this program fixed one BLOCKING implementation bug (an omitted growth term that had inflated the dormancy headline by ~5 orders of magnitude — see `limitations.md`), corrected two SERIOUS unit/convention errors, and — most consequential for this document — found that the novelty framing in §3 below needs revision: the closest prior art is not two-phase flow boiling (Konishi/Mudawar/Hasan) but 55-year-old colloid-filtration theory, which this program's Phase 1-2 searches missed by not searching outside ECLSS/spaceflight/microbiology. §7 below is the corrected framing and supersedes §3's framing (kept for the audit trail, not as the current claim). The §4 network-access blocker never cleared (this sandbox's proxy still blocks every scholarly host tested) and is a standing, disclosed limitation rather than a resolved one — see `limitations.md` §1.
 
 ## 1. Chosen problem
 
@@ -22,7 +22,7 @@ An adversarial Opus pass (`novelty_adjudication.md`) did real additional literat
 
 All three failures shared one structural cause: the Phase 1 surveys searched NTRS/ICES/arXiv but the disqualifying prior art sat in ASME/Elsevier heat-transfer journals, WSTF materials reports, and the astrobiology/bioRxiv literature — outside that scope. This is logged as a methodology finding, not just a result (see `decision_log.md`).
 
-## 3. Why the inverted framing survives where Candidate A did not
+## 3. Why the inverted framing survives where Candidate A did not (original Phase 2 framing — see §7 for the Phase 4 correction)
 
 - **The prior art becomes an input, not competition.** The bioRxiv preprint's two-opposing-mechanisms decomposition, the published depletion-zone radius, the BioRock null result, and the strain-dependent clinostat data all become validation targets and parameters for a transport-regime criterion, rather than results this program would be trying to reproduce or contradict.
 - **The contribution *form* is precedented and respected in an adjacent field.** Konishi, Mudawar & Hasan's "criteria for negating the influence of gravity on flow boiling critical heat flux" (*Int. J. Heat Mass Transfer* 65:203–218, 2013) is exactly this move — a "when does gravity matter" criterion rather than a global scaling law — and it is a well-regarded contribution in the two-phase-flow literature. The identical move has not been made, as far as this program's search has found, on the microbial/biofilm side of ECLSS.
@@ -46,3 +46,19 @@ Standing constraint added mid-checkpoint: any physical validation must be afford
 ## 6. Runners-up and why they lost
 
 Full detail in `novelty_adjudication.md`. In brief: Candidate B (flammability) and Candidate C (two-phase heat transfer) are rejected outright, not merely ranked below the winner — both have real, disqualifying, actively-published prior art at essentially the exact scope proposed. They are not held as fallbacks.
+
+## 7. Corrected novelty framing (Phase 4) — supersedes §3
+
+The Phase 4 red-team ran the same kind of adversarial search that killed Candidates A/B/C in Phase 2, but pointed at *this* problem's own claim, and found the same failure mode recurring one phase later: the search was scoped to ECLSS/spaceflight/microbiology and missed the field where "which transport mechanism delivers a particle to a wall, and does gravity matter" has been a standard question since 1971 — **colloid filtration theory** (water/wastewater treatment) and its sibling, **membrane crossflow engineering**. Specifically (full citations in `lit/sources.bib`, added Phase 4):
+
+- **Yao, Habibian & O'Melia (1971)** decompose single-collector filtration efficiency into exactly diffusion + interception + gravitational sedimentation, with a named gravity number η_G = (settling velocity)/(hydraulic loading rate) — the direct ancestor of `Ga_dep`.
+- **Tufenkji & Elimelech (2004)** is the standard modern correlation, regressing collector efficiency against dimensionless groups including a gravity number `N_G`.
+- **Pich (1972)** gives a *closed-form* deposition efficiency for a horizontal tube in laminar flow, parameterized by a settling number proportional to `v_s·L/(U·D)` — i.e. `Λ_g` up to a constant. This is a stronger prior solution than the threshold criterion this program built for the same geometry.
+- **Belfort, Davis & Zydney (1994)** established the mechanism-vs-particle-size regime-map *form* (Brownian diffusion / shear-induced diffusion / inertial lift / gravitational sedimentation, selected by size) in crossflow microfiltration — structurally the same object as `fig1`, without the gravity axis.
+- **SAE/ICES 2009-01-2359** did partial-gravity particle-transport testing in water-filtration hardware at ICES itself, seventeen years ago, and was missed by both the Phase 1 surveys and the Phase 2 adjudication.
+
+**The contribution is not killed by this — it is narrower and better-anchored than the §3 framing claimed.** The Konishi/Mudawar/Hasan analogy (two-phase flow boiling) was the wrong field's anchor; colloid filtration is the right one, and the honest statement of what's new is:
+
+> **This work parameterizes an established transport-mechanism decomposition (diffusion + interception + gravitational sedimentation, Yao/Habibian/O'Melia 1971; Tufenkji/Elimelech 2004) explicitly in gravitational acceleration `g`, and applies it to ECLSS water-recovery hardware (WPA/UPA/MABR) at Earth, Mars, and lunar gravity — not deriving a new criterion, but adding the gravity axis to a fifty-year-old regime-map form and evaluating it at the specific operating points and particle populations relevant to spacecraft water systems.**
+
+This is a legitimate, real, and — per the corrected quantitative results in `limitations.md` and `redteam_report.md` — still non-trivial contribution: single-cell wall delivery is genuinely ambiguous (within an order of magnitude either way) across the full Earth-to-Moon gravity range at ECLSS-realistic flow conditions, meaning a 1g ground qualification test is not a valid surrogate for that population, while gravity dominates floc/aggregate delivery (>7 µm) by 2-3 orders of magnitude at every gravity level tested, with a genuine size-selective carry-through transition in the 100-200 µm band across the lunar-to-Mars window. What changes is the citation context and the modesty of the "new criterion" claim, not the underlying physics or the figures.

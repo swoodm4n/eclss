@@ -1,63 +1,63 @@
 # Known Limitations
 
-This file collects limitations at the program level. Section-by-section physics/model assumptions
-and their validity ranges are documented exhaustively in `derivation.md` §6 (fluid mechanics,
-particle mechanics, transport modelling, biology/kinetics, and an explicit "not modelled" list) —
-that is the authoritative source and is not duplicated here. This file adds (a) a pointer to the
-single highest-priority open item, (b) one implementation-level finding from Phase 3 not yet in the
-derivation document, and (c) a running list to be extended by the Phase 4 red-team.
+This file is the authoritative, current account of this program's limitations. It supersedes its
+own pre-Phase-4 version (see `decision_log.md` for the superseded text if needed). Section-by-section
+physics assumptions and their validity ranges are documented exhaustively in `derivation.md` §6
+(27 numbered items, A1-A27) — not duplicated here except where Phase 4 changed a grade.
 
-## 1. Highest-priority open item: citation fidelity
+## 1. Standing, unresolved: no scholarly full text has been read in this entire program
 
-Every citation in this program (`gap_register.md`, `novelty_adjudication.md`, `problem_statement.md`,
-`derivation.md`) was found via `WebSearch`. This sandbox's network policy blocks `WebFetch` to every
-scholarly host tested (`ntrs.nasa.gov`, `ttu-ir.tdl.org`, `biorxiv.org`, `arxiv.org`, `ices.space`,
-`sciencedirect.com`, `nature.com`, `mdpi.com`, `ncbi.nlm.nih.gov`, `engineering.purdue.edu`,
-`frontiersin.org` — all return HTTP 403 at the proxy). **No full text has been read in producing this
-program.** Every content claim about a cited paper is `[snippet-level]`, not read-the-PDF fidelity.
-`derivation.md` §10 names this as the single most load-bearing unverified point: the claim that
-sedimentation dominates convective diffusion in a parallel-plate geometry (the strongest available
-defence of the `Ga_dep >> 1` results) rests on a paper (Li/Busscher/van der Mei, *Colloids Surf. B*
-2011) that has not been read in full. Clearing this network restriction is the single highest-value
-action available to this program, named repeatedly across `novelty_adjudication.md`, `derivation.md`,
-and this file, and still outstanding.
+Every citation in every document (`gap_register.md`, `novelty_adjudication.md`, `problem_statement.md`,
+`derivation.md`, `redteam_report.md`) was found via `WebSearch`. This sandbox's network policy blocks
+`WebFetch` to every scholarly host tested across three independent attempts (Phase 2, Phase 3, Phase 4):
+`ntrs.nasa.gov`, `ttu-ir.tdl.org`, `biorxiv.org`, `arxiv.org`, `ices.space`, `sciencedirect.com`,
+`nature.com`, `mdpi.com`, `ncbi.nlm.nih.gov`, `engineering.purdue.edu`, `frontiersin.org`,
+`biocolloid.mcgill.ca`, `esurf.copernicus.org` — all return HTTP 403 at the proxy (policy denial, not
+a site-side block). **No full text has been read in producing this program.** Every content claim
+about a cited paper is `[snippet-level]`, not read-the-PDF fidelity. This is raised repeatedly (three
+separate phases independently hit and reported it) because it is the single highest-value action
+available before submission: clearing it would let this program verify, rather than merely cite,
+its own most load-bearing sources — starting with Li/Busscher/van der Mei (2011) on sedimentation
+vs. convective-diffusion dominance (the strongest defense of `Ga_dep >> 1`) and the four colloid-
+filtration papers in §3 below (which determine how the novelty claim must be worded).
 
-## 2. Implementation-level finding (Phase 3): the well-mixed limit of the eq. (5.7)/(5.8) reduction
+## 2. Phase 4 red-team findings: what was fixed, what remains open
 
-`derivation.md` §5.3(B) specifies `D_v = D_B + D_conv` for the stagnant vertical-mixing term, fed
-into the eq. (5.8) wall-flux formula `k_tot = v_s/(1-exp(-H/h_s))`. Implementing this literally
-(`src/eclss_gravity/dormancy.py`) produces a well-mixed-limit behaviour (`h_s >> H`) of
-`k_tot -> D_v/H`, i.e. a deposition rate that **increases**, not decreases, with stronger convective
-mixing. This is mathematically correct for a perfect-sink wall (with enough time, turbulent transport
-delivers everything to an absorbing boundary just as certainly as settling does), but it sits in
-tension with the more intuitive statement in `derivation.md` §2.2(b)/§3.5 that convection "keeps
-cells suspended" — that statement is about the *instantaneous* flux competition (`Omega = v_s/u_conv`),
-not the *long-time asymptotic fate* against an absorbing boundary. Both are correct within their own
-scope, but a reader could reasonably interpret the derivation's prose as claiming the opposite of what
-the equations, applied literally over a full year, actually produce.
+Full detail in `redteam_report.md` (independent adversarial review: re-derived 14 headline numbers
+from scratch, reproduced 2 figures independently, ran 8 further literature searches). Summary of
+disposition below; "Fixed" means the code/docs were changed and re-verified, not just acknowledged.
 
-**Consequence found and worked around, not hidden:** simulating the 0.30 m tank scenario at any
-realistic `ΔT` gives `Ra >> Ra_c` at all three gravity levels (as `derivation.md` §2.2(b) itself
-already showed via the `ΔT_c` table — tank convection is "unconditionally present"), which drives the
-well-mixed limit and produces near-total, gravity-*insensitive* depletion within hours regardless of
-`g`. The headline dormancy figure (`fig3`) was therefore built on the 6.35 mm line geometry at
-`ΔT` = 1 K instead, where `Ra` straddles `Ra_c` across the three gravity levels and the intended
-"lowering gravity suppresses convection, unopposed settling wins" effect is actually visible (a
-~10^5-10^6× difference in final deposited mass between lunar and Earth/Mars gravity). The tank result
-is still real and is itself informative (gravity is irrelevant to a strongly-convecting tank's fate,
-which is a legitimate finding) — but it should not be the paper's headline dormancy figure, since it
-doesn't test the gravity-dependence claim the program is making.
+| # | Finding | Class | Disposition |
+|---|---|---|---|
+| Dormancy growth term omitted (eq 5.3) | The headline "~2.2×10⁵× lunar/Earth deposit" claim was a substrate-conversion artifact | BLOCKING | **Fixed.** `dormancy.py` now implements eq (5.3) fully. Corrected finding: deposition RATE differs ~1700× by gravity (real); long-time OUTCOME converges to ~unity ratio because g-independent growth kinetics dominate once any deposit seeds. `fig3` and its narrative rebuilt around the corrected finding. |
+| `Ra_c=1708` requires a vertical destabilizing gradient | A real spacecraft line's thermal gradient is not generically vertical-from-below; a horizontal component removes the threshold entirely | BLOCKING for §3.5's "strongest result" framing | **Disclosed, not fixed.** No code change — the Rayleigh-Bénard formula itself is correct for the case it models; what's wrong is treating that case as generic. `derivation.md` A18 should be read as ❌ (upgraded from ⚠️), not ✅. The dormancy rework above already stopped relying on this as the headline, which substantially de-risks it, but the `fig4` "convection switch" figure still implicitly assumes a vertical gradient and should be captioned as conditional on that geometry, not general. |
+| `Λ_g` factor-2 depth convention (R=D/2 vs. Hazen's full depth) | Flips the "100 µm floc settles at Earth, carried through at Mars/Moon" claim | SERIOUS | **Fixed.** `criteria.lambda_g` now uses full depth D. 183 µm floc used as the headline size-selective example instead (survives both conventions). Regression tests updated. |
+| `Re_p` Stokes-validity unenforced in closed-form criteria | Eq (3.3)'s "radius cancels exactly" result has an unstated upper size bound (~184-335 µm depending on gravity) | SERIOUS | **Fixed.** Every closed-form function in `criteria.py` now checks `Re_p` and warns (`UserWarning`) when Stokes' law is applied outside its validity range, rather than silently returning a biased value. `fig1`/Monte Carlo now print how many grid points/samples are affected (~13%). |
+| `cos θ = 1` vs. perimeter-averaged `f_θ = 1/π` give different `g*` | 0.238 `g_E` (local bound) vs. 0.749 `g_E` (physically-correct average) — the original headline used the less-defensible convention | SERIOUS | **Fixed.** `orientation_factor` is now an explicit, named parameter on every `Ga_dep`-family function; default changed to the perimeter-averaged value `derivation.md` §5.3 itself derives as correct. Both conventions are tested explicitly (`test_g_star_single_cell_wpa_is_convention_and_uncertainty_sensitive`) rather than one being silently chosen. |
+| `g* = 0.238 g_E` reported as a precise point estimate | Over-precise by ~50× across the program's own assumed-parameter ranges (0.062-3.04 `g_E`); `derivation.md` §7.3(b) itself said not to do this | BLOCKING | **Fixed via reframing.** No single point value is the headline anymore. The defensible claim (adopted from `redteam_report.md`'s recommended reframe, §7 of `problem_statement.md`): single-cell wall delivery is ambiguous — comparable to within an order of magnitude — across the whole Earth-to-Moon gravity range; `P(Ga_dep>1)` = 0.61/0.30/0.12 at Earth/Mars/Moon (Monte Carlo, single-cell branch only). |
+| Monte Carlo mixed two branches into one misleading statistic | Combined median/interval landed in the empty valley of a bimodal distribution where no sample sits | SERIOUS | **Fixed.** `run_monte_carlo.py` now reports per-branch (cell/diffusion vs. floc/interception) statistics and figures. |
+| Regression tests were transcription checks, not physics checks | §9.6's required closed-form-vs-direct-velocity-ratio cross-check was absent; several §9 deliverables were unused ("dead") code | SERIOUS | **Fixed.** Added cross-check tests (`ga_dep_closed_form` vs. `ga_dep_direct`, `Ga_dep=min(Ga_dif,Ga_int)`, `a_c` closed-form vs. numerical root-find). Wired previously-dead functions (`ga_mot`, `entrance_length`, `stokes_validity_diameter`, `crossover_radius`) into tests. |
+| Novelty framing anchored to the wrong field (two-phase flow boiling) | Colloid-filtration theory (Yao/Habibian/O'Melia 1971; Tufenkji/Elimelech 2004; Pich 1972; Belfort/Davis/Zydney 1994) already owns this decomposition and an ICES paper (SAE 2009-01-2359) already did partial-gravity particle transport in water hardware | BLOCKING for framing | **Fixed.** `problem_statement.md` §7 restates the contribution as adding a gravity axis to an established 1971-2004 transport-regime decomposition, not deriving a new criterion. New citations added to `lit/sources.bib`. |
+| §5's general 1-D PDE (Danckwerts BCs, recycle closure, grid-convergence) was never implemented | `run.md`/derivation §9.7 implied it existed | SERIOUS | **Disclosed, not built.** Only the closed-form analytic criteria (§3, the actual headline deliverable — `derivation.md` §5.9 itself says the PDE isn't needed to *locate* the regime boundary, only to show consequences) and the 0-D stagnant reduction (§5.7, `dormancy.py`) were implemented. `run.md` no longer overclaims; see §4 below. |
+| `A3` steady-flow assumption; `A11` `Δρ<0` (rising aggregates) never sampled | The WPA duty-cycles (not analyzed as a time-varying hybrid regime); some biofilm is reported less dense than water and would deposit on the *top* wall, inverting every deposition-location conclusion | SERIOUS | **Disclosed, not fixed.** `test_negative_delta_rho_sign_symmetry` confirms the code handles the sign correctly if given a negative `Δρ`, but no figure or Monte Carlo sample currently explores `Δρ<0`, and no regime is evaluated as a time-varying pumped/stagnant hybrid. Both are real, stated gaps for future work. |
+| `A12` non-motile-cells assumption under-drawn | The actual ISS isolates motivating this work (*P. aeruginosa*, *Burkholderia*, *Stenotrophomonas*) are flagellated; `Ga_dep` for a motile single cell overstates gravity's role by ~500× | SERIOUS | **Partially fixed.** `criteria.ga_mot` is now tested and available for reporting; the manuscript must state prominently (not in a limitations footnote) that the single-cell `Ga_dep` result applies to non-motile/motility-repressed cells, and that motile planktonic cells are dominated by self-propulsion, not gravity, at every gravity level considered. |
+| fig1 non-physical kink at `d=7 µm`; fig3 mislabelled "tank floor" | Cosmetic/labeling | MINOR | **Both fixed.** |
 
-**This is flagged explicitly for the Phase 4 red-team**: is the eq. (5.7)/(5.8) reduction the right
-one for the well-mixed regime, or does it need an explicit two-branch treatment (settling-flux vs.
-Rouse-profile-equilibrium vs. mixing-limited-delivery-to-a-perfect-sink) rather than one formula
-applied uniformly? The current code implements the derivation as specified; whether the derivation's
-own specification is the physically correct reduction in the well-mixed limit is exactly the kind of
-question an adversarial check should resolve, not something to quietly patch around.
+## 3. Standing methodology lesson (recorded once, applies going forward)
 
-## 3. Everything else
+Both the Phase 2 adjudication (candidates A/B/C) and the Phase 4 red-team (this problem's own novelty
+claim) found the same failure mode: absence-of-hits in a search scoped to the obviously-relevant field
+(ECLSS/NTRS/spaceflight biology, then heat-transfer journals) was mistaken for absence of prior art,
+when the actual disqualifying or contextualizing literature sat in an adjacent field the search never
+reached (astrobiology/bioRxiv for A; colloid filtration/membrane engineering for this problem). Any
+future novelty or completeness claim in this program should default to searching at least one field
+laterally adjacent to the obvious one before treating a clean search as evidence.
 
-See `derivation.md` §6 for the full assumption table (27 numbered items, A1-A27) and §7 for the
-uncertainty ranking. The single most consequential ASSUMED (not sourced) values are the WPA/UPA
-process-line internal diameter (6.35 mm, swept 3.18-12.7 mm in `fig2`) and the bimodal particle-size
-distribution parameters (§7.3(b), used in the Monte Carlo). Both are swept, not fixed, in the code.
+## 4. `run.md` accuracy note
+
+`run.md` previously stated that figure generation reproduces results "from the equations in
+`/src/eclss_gravity`" without qualification. That is accurate for the closed-form criteria (§2-3) and
+the 0-D dormancy reduction (§5.7) — both fully implemented and tested — but not for the general 1-D
+PDE (§5.1-5.2, §9.7), which was never built (see table above). This is a deliberate scope decision
+consistent with `derivation.md` §5.9 (the PDE is not needed to *locate* the regime boundary), not an
+unfinished implementation, but `run.md` should be read with that scope in mind.

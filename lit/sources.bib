@@ -289,3 +289,69 @@
   pages = {1753--1760},
   year = {1986},
 }
+
+% --- Added Phase 4 (red-team, redteam_report.md \S4): colloid-filtration / membrane-engineering
+% prior art the Phase 1-2 searches missed by not searching outside ECLSS/spaceflight/microbiology.
+% This is the correct primary literature for the paper's novelty framing -- see problem_statement.md
+% \S6 and limitations.md. All entries [verified-existence] per redteam_report.md; content
+% [snippet-level] (proxy blocked full-text access to all of these too).
+
+@article{yao1971filtration,
+  author = {Yao, Kuan-Mu and Habibian, Mohammad T. and O'Melia, Charles R.},
+  title = {Water and waste water filtration: concepts and applications},
+  journal = {Environmental Science \& Technology},
+  volume = {5},
+  number = {11},
+  pages = {1105--1112},
+  year = {1971},
+  note = {Founding reference for the diffusion + interception + gravitational-sedimentation single-collector efficiency decomposition; the gravity number eta\_G is the ratio of Stokes settling velocity to hydraulic loading rate -- the closest direct precedent for Ga\_dep. NOT cited in derivation.md; must be in the manuscript.},
+}
+
+@article{tufenkji2004correlation,
+  author = {Tufenkji, Nathalie and Elimelech, Menachem},
+  title = {Correlation equation for predicting single-collector efficiency in physicochemical filtration in saturated porous media},
+  journal = {Environmental Science \& Technology},
+  volume = {38},
+  number = {2},
+  pages = {529--536},
+  year = {2004},
+  note = {Standard modern correlation; regresses total single-collector efficiency against dimensionless groups including a named gravity number N\_G. Manuscript must state explicitly how Ga\_dep differs from N\_G.},
+}
+
+@article{pich1972gravitational,
+  author = {Pich, Jaroslav},
+  title = {Theory of gravitational deposition of particles from laminar flows in channels},
+  journal = {Journal of Aerosol Science},
+  volume = {3},
+  number = {5},
+  pages = {351--361},
+  year = {1972},
+  note = {Closed-form deposition efficiency for a horizontal cylindrical tube in laminar flow, parameterised by a settling parameter proportional to v\_s*L/(U*D) -- i.e. Lambda\_g up to a constant. A stronger, exact prior solution for Criterion 2's exact geometry; motivates presenting Lambda\_g as a threshold proxy for Pich's efficiency rather than a novel criterion.},
+}
+
+@article{belfort1994crossflow,
+  author = {Belfort, Georges and Davis, Robert H. and Zydney, Andrew L.},
+  title = {The behavior of suspensions and macromolecular solutions in crossflow microfiltration},
+  journal = {Journal of Membrane Science},
+  volume = {96},
+  pages = {1--58},
+  year = {1994},
+  note = {Canonical treatment of competing back-transport mechanisms (Brownian diffusion, shear-induced diffusion, inertial lift, gravitational sedimentation) selected by particle size, including the well-known back-transport minimum near 0.1-1 um. fig1's regime map is structurally the same object with gravity added as a second axis; establishes the contribution form as adding a g-axis to a known decomposition, not deriving a new one.},
+}
+
+@techreport{sae2009lunargravity,
+  title = {A Novel Testing Protocol for Evaluating Particle Behavior in Fluid Flow Under Simulated Reduced Gravity Conditions},
+  institution = {39th International Conference on Environmental Systems, Savannah, GA},
+  year = {2009},
+  number = {SAE 2009-01-2359},
+  note = {Prior partial-gravity particle-transport work AT THE TARGET VENUE, missed by both the Phase 1 subsystem surveys and the Phase 2 novelty adjudication. Tracer-particle flow through a glass-bead media filter for lunar regolith-based water filtration, flown at microgravity and lunar gravity on NASA's reduced-gravity aircraft, with an inclined-clinostat ground analogue. Also supplies the cheap (tens-of-dollars) fractional-gravity validation route this program's individual-fundability constraint needs.},
+}
+
+@article{esurf2025settling,
+  title = {Computational sedimentation modelling calibration: a tool to measure the settling velocity under different gravity conditions},
+  journal = {Earth Surface Dynamics},
+  volume = {13},
+  pages = {549},
+  year = {2025},
+  note = {Particle settling trajectories in water recorded under reduced Martian and lunar gravity in parabolic flight -- free, direct empirical validation data for eq (2.1)'s v\_s proportional-to-g scaling, the single most load-bearing physical assumption in the whole criterion. Uncited in derivation.md; should be added.},
+}
