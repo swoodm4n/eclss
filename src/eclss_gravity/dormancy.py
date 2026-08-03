@@ -87,12 +87,23 @@ def simulate_dormancy(
 ) -> DormancySimResult:
     """Integrate the 0-D dormancy reactor: growth, decay, and gravity-driven wall loss.
 
+    Follows derivation.md eqs. (5.1)-(5.3) reduced to 0-D (sigma = 1/H for a single-floor
+    reactor of depth H, per the settling_rate_constant docstring). No detachment term:
+    derivation.md §5.4 states detachment is shear-driven and does not exist in a stagnant
+    (U=0, no wall shear) segment, which is exactly this reactor's regime.
+
     dC_i/dt = (mu(S) - b) * C_i - k_i(g) * C_i
-    dS/dt   = -(1/Y) * mu(S) * sum_i C_i           (substrate consumption by suspended biomass)
-    dX/dt   = sum_i k_i(g) * C_i * H  - b_f * X     (deposited areal mass gains a volumetric->areal
-                                                       conversion: a loss rate k_i [1/s] from a
-                                                       reactor of depth H deposits k_i*C_i*H onto
-                                                       unit floor area per unit time)
+    dS/dt   = -(1/Y) * mu(S) * sum_i C_i  -  (1/(Y*H)) * mu(S_w) * X    (eq 5.2, sigma=1/H)
+    dX/dt   = [mu(S_w) - b_f] * X  +  sum_i k_i(g) * C_i * H            (eq 5.3)
+
+    IMPORTANT CORRECTION (Phase 4 red-team, redteam_report.md §3): the biofilm growth term
+    mu(S_w)*X and its substrate sink were omitted from an earlier version of this function.
+    Their absence made the dormancy scenario's gravity-dependence an artifact of denying
+    the deposited biomass the ability to grow (the original headline ~10^5x lunar/Earth
+    deposit ratio was a substrate-conversion timing effect, not a transport effect -- see
+    redteam_report.md §3.2(d)-(e) and limitations.md for the corrected interpretation).
+    S_w = S is used throughout (no external mass-transfer resistance, derivation.md eq 5.11's
+    "fast option", stated there to be accurate for thin biofilms at high S).
     """
     if kinetic_params is None:
         kinetic_params = kin.KineticParams()
@@ -128,12 +139,13 @@ def simulate_dormancy(
         C = np.maximum(y[:n_classes], 0.0)
         S = max(y[n_classes], 0.0)
         X = max(y[n_classes + 1], 0.0)
-        mu_S = kin.monod_rate(S, kp.mu_max, kp.K_s, kp.phi_g)
+        mu_S = kin.monod_rate(S, kp.mu_max, kp.K_s, kp.phi_g)  # S_w = S (eq 5.11 fast option)
         dC = (mu_S - kp.b) * C - k_arr * C
         total_C = C.sum()
-        dS = -(1.0 / kp.Y) * mu_S * total_C if kp.Y > 0 else 0.0
-        deposit_flux = (k_arr * C).sum() * H  # kg/m^2/s onto unit floor area
-        dX = deposit_flux - kp.b_f * X
+        deposit_flux = (k_arr * C).sum() * H  # kg/m^2/s onto unit floor area (eq 5.4/5.5 -> areal)
+        biofilm_growth = mu_S * X  # eq (5.3) growth term -- previously omitted, see docstring
+        dS = -(1.0 / kp.Y) * (mu_S * total_C + biofilm_growth / H) if kp.Y > 0 else 0.0
+        dX = biofilm_growth - kp.b_f * X + deposit_flux
         return np.concatenate([dC, [dS], [dX]])
 
     t_eval = np.linspace(0, duration_s, n_eval)
