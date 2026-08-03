@@ -123,9 +123,11 @@ def simulate_dormancy(
     k_arr = np.array(k_list)
 
     def rhs(t, y):
-        C = y[:n_classes]
-        S = y[n_classes]
-        X = y[n_classes + 1]
+        # derivation.md §5.8 item 8: clip non-negativity to prevent Monod/rate blowup
+        # once a stiff decay term has driven a state to numerical zero.
+        C = np.maximum(y[:n_classes], 0.0)
+        S = max(y[n_classes], 0.0)
+        X = max(y[n_classes + 1], 0.0)
         mu_S = kin.monod_rate(S, kp.mu_max, kp.K_s, kp.phi_g)
         dC = (mu_S - kp.b) * C - k_arr * C
         total_C = C.sum()
@@ -139,8 +141,11 @@ def simulate_dormancy(
     if not sol.success:
         raise RuntimeError(f"dormancy integration failed: {sol.message}")
 
-    C_out = {pc.label: sol.y[i] for i, pc in enumerate(particle_classes)}
-    S_out = sol.y[n_classes]
-    X_out = sol.y[n_classes + 1]
+    # Clip reported output too: the solver's internal trajectory can carry small
+    # negative floating-point excursions once a state has decayed to numerical
+    # zero, even though the RHS clips at evaluation time (derivation.md §5.8 item 8).
+    C_out = {pc.label: np.maximum(sol.y[i], 0.0) for i, pc in enumerate(particle_classes)}
+    S_out = np.maximum(sol.y[n_classes], 0.0)
+    X_out = np.maximum(sol.y[n_classes + 1], 0.0)
 
     return DormancySimResult(t=sol.t, C=C_out, X=X_out, S=S_out, g=g, H=H, Ra=Ra_last, D_v_by_class=D_v_by_class)
