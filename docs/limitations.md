@@ -53,7 +53,32 @@ reached (astrobiology/bioRxiv for A; colloid filtration/membrane engineering for
 future novelty or completeness claim in this program should default to searching at least one field
 laterally adjacent to the obvious one before treating a clean search as evidence.
 
-## 4. `run.md` accuracy note
+## 4. Sensitivity checks (derivation.md §7.3(c), closed post-Phase-4)
+
+`redteam_report.md` Finding 1.4 noted that the derivation's own "mandatory" one-at-a-time
+structural checks were never implemented. `scripts/run_sensitivity_checks.py` now runs all four
+(`results/data/sensitivity_checks.csv`); two produced results important enough to state here
+rather than leave in a CSV:
+
+- **Detachment exponent `n` (A27, unresolved in the literature — linear vs. exponential shear
+  dependence) changes the biofilm loss timescale at the WPA nominal line by ~300×: 20 days at
+  `n=1` vs. ~16 years at `n=3`.** This is a far larger sensitivity than any other parameter in
+  the retention/detachment side of the model and should be read as a genuinely open question,
+  not a rounding uncertainty — any claim about how long a deposit persists once formed is not
+  currently defensible to better than two orders of magnitude.
+- **The Figure 4 three-way gravity separation (Earth/Mars convecting, Moon not) is not robust
+  to the O(1) geometric uncertainty on `Ra_c` that assumption A18 already conceded.** At
+  `Ra_c × 0.5`, the same three-way split holds. At `Ra_c × 2` (still within the stated
+  uncertainty for a tube rather than an infinite plane layer), Mars *also* stops convecting —
+  the result degrades to a two-way split (Earth vs. Mars-and-Moon), not three-way. This
+  quantifies, rather than just names, `redteam_report.md` Finding 2.5's concern that Mars sits
+  only 10% above the nominal `Ra_c`.
+- Two other checks were reassuring: the orientation-factor sensitivity is exactly the expected
+  factor of `π` (already documented in §2's table), and the growth-modulation factor `φ(g)`
+  shifts final dormancy mass by a modest, roughly proportional amount without changing the
+  qualitative Earth/Mars/Moon convergence story from Figure 3.
+
+## 5. `run.md` accuracy note
 
 `run.md` previously stated that figure generation reproduces results "from the equations in
 `/src/eclss_gravity`" without qualification. That is accurate for the closed-form criteria (§2-3) and

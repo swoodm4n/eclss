@@ -1,0 +1,27 @@
+check,variant,gravity,Ga_dep_single_cell,k_det_per_s,biofilm_loss_timescale_days,Ra,Ra_c_tested,convecting,X_final_mg_m2
+1_orientation_factor,perimeter_averaged_1_over_pi (default),Earth,1.335760285775954,,,,,,
+1_orientation_factor,perimeter_averaged_1_over_pi (default),Mars,0.5051652049162882,,,,,,
+1_orientation_factor,perimeter_averaged_1_over_pi (default),Moon,0.2205842673758456,,,,,,
+1_orientation_factor,local_bottom_of_tube_cos1,Earth,4.196414700750739,,,,,,
+1_orientation_factor,local_bottom_of_tube_cos1,Mars,1.5870232966141937,,,,,,
+1_orientation_factor,local_bottom_of_tube_cos1,Moon,0.6929859138854432,,,,,,
+2_detachment_exponent,n=1,N/A (R1 pumped),,5.820004078047655e-07,19.88671127865712,,,,
+2_detachment_exponent,n=3,N/A (R1 pumped),,1.971377824000745e-09,5871.058268569475,,,,
+3_rayleigh_critical,Ra_c_x0.5,Earth,,,,4953.082964065788,854.0,True,
+3_rayleigh_critical,Ra_c_x0.5,Mars,,,,1873.1842810075502,854.0,True,
+3_rayleigh_critical,Ra_c_x0.5,Moon,,,,817.9403059925154,854.0,False,
+3_rayleigh_critical,Ra_c_default_x1,Earth,,,,4953.082964065788,1708.0,True,
+3_rayleigh_critical,Ra_c_default_x1,Mars,,,,1873.1842810075502,1708.0,True,
+3_rayleigh_critical,Ra_c_default_x1,Moon,,,,817.9403059925154,1708.0,False,
+3_rayleigh_critical,Ra_c_x2,Earth,,,,4953.082964065788,3416.0,True,
+3_rayleigh_critical,Ra_c_x2,Mars,,,,1873.1842810075502,3416.0,False,
+3_rayleigh_critical,Ra_c_x2,Moon,,,,817.9403059925154,3416.0,False,
+4_gravity_growth_modulation,phi=0.8 (-20%),Earth,,,,,,,1.444072455846061
+4_gravity_growth_modulation,phi=0.8 (-20%),Mars,,,,,,,1.4440794075188648
+4_gravity_growth_modulation,phi=0.8 (-20%),Moon,,,,,,,1.3990098686371442
+4_gravity_growth_modulation,"phi=1.0 (default, deliberate)",Earth,,,,,,,1.3879488868395
+4_gravity_growth_modulation,"phi=1.0 (default, deliberate)",Mars,,,,,,,1.3879542934852303
+4_gravity_growth_modulation,"phi=1.0 (default, deliberate)",Moon,,,,,,,1.3293492960320037
+4_gravity_growth_modulation,phi=1.2 (+20%),Earth,,,,,,,1.3519480539803197
+4_gravity_growth_modulation,phi=1.2 (+20%),Mars,,,,,,,1.3519524505711402
+4_gravity_growth_modulation,phi=1.2 (+20%),Moon,,,,,,,1.282695003661517
