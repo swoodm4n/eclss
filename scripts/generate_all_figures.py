@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPTS = ["run_regime_sweep.py", "run_dormancy_sim.py", "run_monte_carlo.py", "run_sensitivity_checks.py"]
+SCRIPTS = ["run_regime_sweep.py", "run_dormancy_sim.py", "run_monte_carlo.py", "run_sensitivity_checks.py", "run_extended_scenarios.py"]
 
 
 def main():

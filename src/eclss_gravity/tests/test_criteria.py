@@ -260,6 +260,20 @@ def test_entrance_length_flags_r1_as_not_fully_developed():
     assert L_e / r1.L == pytest.approx(0.234, rel=0.05)
 
 
+def test_ga_dep_closed_form_sign_symmetric_for_negative_delta_rho():
+    """Regression for a real bug found post-Phase-4 (A11 exploration): a naive
+    min(Ga_dif, Ga_int) is only correct for delta_rho > 0. See criteria.ga_dep_closed_form
+    docstring for the full explanation. |Ga_dep| must be IDENTICAL for +/-delta_rho of the
+    same magnitude (only the sign, representing deposition-wall direction, should flip)."""
+    r1 = hydrodynamics.REGIME_R1_WPA_NOMINAL
+    gamma_w = _gamma_w(r1)
+    ga_sinking = criteria.ga_dep_closed_form(particles.P1_CELL.a, 93.0, G_E, MU, T_K, gamma_w, r1.L, r1.D)
+    ga_rising = criteria.ga_dep_closed_form(particles.P1_CELL.a, -93.0, G_E, MU, T_K, gamma_w, r1.L, r1.D)
+    assert ga_sinking > 0
+    assert ga_rising < 0
+    assert abs(ga_sinking) == pytest.approx(abs(ga_rising), rel=1e-9)
+
+
 def test_negative_delta_rho_sign_symmetry():
     """derivation.md A11: some biofilm is reported less dense than water (Delta_rho ~ -99
     kg/m^3), i.e. it would rise rather than settle. Criteria must not crash and the settling

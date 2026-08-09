@@ -1,0 +1,7 @@
+class,gravity,v_s_m_per_s,direction,Ga_dep_magnitude
+"sinking cell (+93 kg/m3, nominal)",Earth,6.741355577528086e-08,toward bottom wall,1.335760285775954
+"sinking cell (+93 kg/m3, nominal)",Mars,2.549483098127339e-08,toward bottom wall,0.5051652049162882
+"sinking cell (+93 kg/m3, nominal)",Moon,1.1132513797752803e-08,toward bottom wall,0.2205842673758456
+"rising fragment (-99 kg/m3, gas-entrapping biofilm)",Earth,-7.176281743820223e-08,toward top wall,1.4219383687292413
+"rising fragment (-99 kg/m3, gas-entrapping biofilm)",Mars,-2.713965878651684e-08,toward top wall,0.5377565084592747
+"rising fragment (-99 kg/m3, gas-entrapping biofilm)",Moon,-1.1850740494382016e-08,toward top wall,0.23481551043235174

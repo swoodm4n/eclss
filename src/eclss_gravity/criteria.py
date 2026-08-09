@@ -139,14 +139,22 @@ def ga_dep_closed_form(
     a: float, delta_rho: float, g: float, mu: float, T_K: float, gamma_w: float, x: float, D: float,
     orientation_factor: float = ORIENTATION_PERIMETER_AVERAGED,
 ) -> float:
-    """Ga_dep = max branch selection between the diffusion and interception closed forms.
+    """Ga_dep = v_s / max(k_lev, k_int), computed via the branch closed forms.
 
-    Since Ga_dep = v_s / max(k_lev, k_int) = min(v_s/k_lev, v_s/k_int) = min(Ga_dif, Ga_int).
+    BUGFIX (found during A11 negative-buoyant-density exploration, post-Phase-4): a naive
+    min(Ga_dif, Ga_int) is only correct for delta_rho > 0. Since Ga_dif = v_s/k_lev and
+    Ga_int = v_s/k_int with k_lev, k_int > 0 always, both branches carry the SIGN of v_s. For
+    v_s > 0, v_s/max(k_lev,k_int) = min(v_s/k_lev, v_s/k_int) (dividing a positive number by a
+    larger denominator gives a smaller result) -- but for v_s < 0 (rising, negative-buoyant
+    aggregates, A11), dividing a negative number by a larger denominator gives a LESS negative
+    (larger) result, so the correct branch selection is max(), not min(). The un-fixed version
+    selected the wrong branch for delta_rho<0 and reported a magnitude ~880x too large for a
+    rising biofilm fragment. Fixed here by selecting on |Ga|, which is branch-selection-correct
+    regardless of sign, then restoring the sign.
     """
-    return min(
-        ga_dif_closed_form(a, delta_rho, g, mu, T_K, gamma_w, x, D, orientation_factor),
-        ga_int_closed_form(a, delta_rho, g, mu, gamma_w, x, D, orientation_factor),
-    )
+    ga_dif = ga_dif_closed_form(a, delta_rho, g, mu, T_K, gamma_w, x, D, orientation_factor)
+    ga_int = ga_int_closed_form(a, delta_rho, g, mu, gamma_w, x, D, orientation_factor)
+    return ga_dif if abs(ga_dif) <= abs(ga_int) else ga_int
 
 
 def g_star_dif(
