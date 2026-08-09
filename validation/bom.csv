@@ -1,24 +1,27 @@
 part,quantity,spec,example_supplier_or_search_term,approx_price_usd,category,must_buy_or_likely_owned,lead_time_note
-"Part A: Rayleigh-Benard convection-onset test",,,,,,,
-Tall glass/clear vessel,1,"250-500 mL graduated cylinder or boiling tube, clear, heat-safe borosilicate glass, diameter 25-40mm, height >=250mm",search 'borosilicate graduated cylinder 250mL' or 'boiling tube 300mm',15,vessel,must_buy,in stock, ships in days
-Immersion circulator or aquarium heater + controller,1,"budget sous-vide immersion circulator (e.g. Inkbird ISV-100W class), or aquarium heater + separate PID temperature controller",search 'Inkbird sous vide circulator budget' or 'aquarium heater + PID controller kit',65,heating,must_buy,in stock
-Dual-channel K-type digital thermometer,1,"-50 to 300C range, 2x thermocouple probe inputs, resolution 0.1C",search 'dual channel K-type thermocouple thermometer',25,instrumentation,must_buy,in stock
-K-type thermocouple probes (spare),2,"wire thermocouple probe, thin-tip, K-type, 1m lead",usually bundled with the thermometer above; buy 2 spares,10,instrumentation,must_buy,in stock
-Food coloring (liquid),1,"standard kitchen food dye, any color, water-soluble",already in most kitchens,3,tracer,likely_owned,n/a
-Syringe (no needle),2,"5-10 mL plastic syringe, blunt tip, for gentle tracer release",search '10mL syringe blunt tip pack' (often sold for e-liquid/hobby use),8,tracer delivery,must_buy,in stock
-Stand and clamp,1,"lab retort stand + clamp, or improvised (ring stand, or 3D-printed/wood jig) to hold the vessel vertical",search 'retort stand clamp set' or improvise from hardware-store parts,20,fixture,likely_owned or DIY,in stock
-Distilled or filtered water,4,liters,"grocery store distilled water, or tap water dechlorinated 24h",already available,4,consumable,likely_owned,n/a
-GFCI power outlet/adapter,1,"portable GFCI adapter if your workspace outlet is not already GFCI-protected",search 'portable GFCI outlet adapter',15,safety,must_buy if not already GFCI,in stock
-Phone or basic camera for video/photos,1,"any smartphone camera is sufficient",already owned,0,data capture,likely_owned,n/a
-"Part A subtotal (must-buy items only)",,,,~146,,,
+"Part A: Rayleigh-Benard convection-onset test (shallow-layer control + tube measurement)",,,,,,,
+Flat-bottomed shallow dish (control cell),1,"glass petri dish ~100mm diameter, or small flat glass baking dish; flat bottom is essential for uniform layer depth",search 'glass petri dish 100mm' or use a kitchen glass baking dish,10,vessel,likely_owned or must_buy,in stock
+Small-bore clear rigid tube (measurement cell),1,"2-3 mm INTERNAL bore, clear rigid acrylic or glass, 100-200mm length. Rigid preferred over silicone (soft tubing sags and changes H). Buy a short assortment if unsure of bore.",search 'clear rigid acrylic tube 3mm ID' or 'glass capillary tube 3mm bore',12,vessel,must_buy,in stock
+Tube end caps / sealant,1,"silicone plugs, epoxy, or hot glue to seal the tube bubble-free at both ends",hardware store; likely already owned,6,vessel,likely_owned,in stock
+Electric hot plate OR aquarium heater + metal plate,1,"any flat uniformly-heated surface. Uniformity matters MORE than precision - a hot spot creates a horizontal gradient that convects at any delta_T and invalidates the measurement.",search 'small electric hot plate' or 'aquarium heater 100W' + a flat aluminium/steel plate,45,heating,must_buy,in stock
+Temperature controller (optional but recommended),1,"inexpensive PID or thermostat controller to hold a stable low delta_T; a sous-vide circulator substitutes well if already owned",search 'Inkbird temperature controller' or reuse a sous-vide circulator,35,heating control,likely_owned or must_buy,in stock
+Dual-channel K-type digital thermometer,1,"-50 to 300C, 2 thermocouple inputs, 0.1C resolution. Differential measurement with matched probes on one meter cancels most absolute error - this is why a dual-channel unit matters more than a high-accuracy single one.",search 'dual channel K-type thermocouple thermometer',25,instrumentation,must_buy,in stock
+K-type thermocouple probes,2,"thin-tip wire probes, K-type, matched pair (buy 2 identical)",usually bundled with the meter above; buy a matched spare pair,10,instrumentation,must_buy,in stock
+Digital calipers or depth gauge,1,"to measure layer depth / tube bore precisely - this enters the Rayleigh number as H^3, so a 5% depth error is a 16% Ra error",search 'digital calipers',15,metrology,likely_owned or must_buy,in stock
+Mica powder or aluminium flake tracer,1,"fine flake tracer that aligns with shear and makes convection cells DIRECTLY visible as a polygonal/roll pattern - far better onset signal than watching dye diffuse",search 'mica powder fine cosmetic grade' or 'aluminium flake pigment',12,tracer,must_buy,in stock
+Food coloring (backup tracer),1,"standard kitchen food dye, water-soluble",already in most kitchens,3,tracer,likely_owned,n/a
+Distilled or filtered water,4,"liters; grocery store distilled water",already available,4,consumable,likely_owned,n/a
+GFCI power outlet/adapter,1,"portable GFCI adapter if the workspace outlet is not already GFCI-protected",search 'portable GFCI outlet adapter',15,safety,must_buy if not already GFCI,in stock
+Phone or basic camera,1,"for timestamped video/photos of convection-cell onset",already owned,0,data capture,likely_owned,n/a
+"Part A subtotal (must-buy items only)",,,,~150,,,
 ,,,,,,,
 "Part B (optional): inclined-clinostat fractional-gravity analog",,,,,,,
 Small geared DC motor,1,"low-RPM (1-5 RPM) geared DC motor, for slow clinostat rotation",search 'low RPM geared DC motor 1-5 RPM' (common in citizen-science clinostat/plant-biology builds),18,motor,must_buy,in stock
 Motor speed controller / power supply,1,"variable DC power supply or PWM controller for the motor above, 6-12V",search 'PWM DC motor speed controller kit',15,electronics,must_buy,in stock
 Small flow tube or capillary,2,"clear tubing, 3-10mm ID, ~30cm length, for the settling-column mount on the clinostat",search 'clear silicone tubing 6mm ID' or 'clear PVC tubing small diameter',10,vessel,must_buy,in stock
-Mounting hardware / tilt fixture,1,"basic bracket/hinge hardware to mount the tube at ~10 degrees off the motor's rotation axis, or 3D-printed bracket",hardware store fasteners, or a local makerspace 3D printer,25,fixture,must_buy or DIY,in stock
+Mounting hardware / tilt fixture,1,"basic bracket/hinge hardware to mount the tube at ~10 degrees off the motor's rotation axis, or 3D-printed bracket","hardware store fasteners, or a local makerspace 3D printer",25,fixture,must_buy or DIY,in stock
 Test bead/floc surrogates,1,"polystyrene or glass microspheres, ~5-10 um and ~100-200 um size classes, small vial each",search 'polystyrene microspheres 100 micron' (science-hobbyist/citizen-science suppliers),40,tracer,must_buy,"order online, allow 1-2 weeks"
 Small pump or gravity-feed reservoir,1,"aquarium-grade small peristaltic or gravity-fed drip system for a slow, controlled flow through the clinostat-mounted tube",search 'mini peristaltic pump 12V' or improvise a gravity-fed IV-drip-style reservoir,20,flow control,must_buy,in stock
 "Part B subtotal (must-buy items only, additional to Part A)",,,,~128,,,
 ,,,,,,,
-"GRAND TOTAL (Part A + Part B)",,,,~274,,,
+"GRAND TOTAL (Part A + Part B)",,,,~278,,,

@@ -10,50 +10,88 @@ What follows is an **optional** validation plan for someone who wants to go furt
 
 ### A.1 What this test proves
 
-`docs/derivation.md` §2.2(b) predicts a sharp onset of buoyant convection in a stagnant, vertically-heated water-filled tube once the Rayleigh number `Ra = gβΔT H³/(να)` exceeds the critical value `Ra_c = 1708`. This is the mechanism behind Figure 4 and the dormancy-rate result in Figure 3.
+`docs/derivation.md` §2.2(b) predicts a sharp onset of buoyant convection in stagnant water once the Rayleigh number `Ra = gβΔT H³/(να)` exceeds a critical value taken as `Ra_c = 1708`. This threshold is the mechanism behind Figure 4 and the dormancy deposition-rate result in Figure 3.
 
-**The key insight that makes this testable on Earth without a centrifuge:** `Ra_c = 1708` is a universal, gravity-independent threshold. Since `Ra ∝ g·ΔT`, an equivalent Rayleigh number to what a 6.35 mm line would reach at *lunar* gravity with a 2 K gradient can be reached at *Earth* gravity with a proportionally smaller `ΔT` (specifically, `ΔT_Earth = ΔT_target × (g_Moon/g_Earth) = ΔT_target × 0.165`). **This test validates the fluid-mechanics model itself — the existence and location of the `Ra_c` threshold — using only Earth gravity and a controlled temperature difference.** It does not directly validate the gravity-scaling itself (that would need reduced gravity — see Part B) but it validates the single most consequential, and currently least-verified, mechanism in the derivation: whether convection really turns on/off where the model says it does, and whether it really suppresses/enables net particle deposition the way `derivation.md` §3.5 and this program's corrected Figure 3 claim.
+**The specific open question this test answers.** `Ra_c = 1708` is the classical value for a *rigid–rigid infinite plane layer*. An ECLSS water line is a **tube**, which is not an infinite plane layer. `derivation.md` assumption A18 concedes an unquantified "O(1) geometric factor" for this mismatch, and `docs/limitations.md` §4 shows that a factor of **2** in `Ra_c` is enough to collapse Figure 4's three-way Earth/Mars/Moon gravity separation into a two-way split — because Mars sits only 10% above the nominal threshold. **Measuring the real `Ra_c` for tube geometry is therefore the single highest-value contribution a cheap bench test can make to this model**, and it needs no reduced gravity to do it.
 
-**Pass/fail criterion, stated before testing:** below the predicted `ΔT_c` (computed from your actual tube geometry — see §A.4), dye or tracer particles introduced at the top of a vertical tube should remain visibly stratified (minimal lateral/vertical mixing) for at least 30 minutes. Above `1.5×ΔT_c`, visible convective mixing (dye spreading, tracer redistribution) should occur within 5 minutes. A null result — no qualitative difference in mixing behavior across this `ΔT` range — falsifies the convection-onset mechanism as modeled and should be reported as such, not adjusted away.
+**Why this works at Earth gravity.** `Ra_c` is a dimensionless threshold; it does not depend on `g`. Since `Ra ∝ g·β·ΔT·H³`, the same Rayleigh number reached by a lunar-gravity line can be reached at Earth gravity by adjusting `ΔT` and `H`. The test measures the *threshold*, which then applies at every gravity level.
 
-### A.2 Bill of materials
+**Critical design constraint (get this right or the experiment is impossible).** Because `Ra ∝ H³`, the controllable quantity `ΔT_c` is violently sensitive to depth:
 
-See `validation/bom.csv`. Total for Part A: **approximately $140** (must-buy items only; a lab stand/clamp is often already on hand and is excluded from that figure — see `bom.csv`), entirely consumer/hobbyist-grade, no vendor account or long lead time required. Everything is either already in a typical home/garage or available same-week from a hardware store or Amazon.
+| layer depth / tube bore | predicted `ΔT_c` at Earth `g` | measurable? |
+|---|---|---|
+| 250 mm (a tall cylinder) | ~0.00001 K | **no — hopeless** |
+| 25 mm | 0.006 K | no |
+| 6.35 mm (the actual WPA line bore) | 0.34 K | marginal; needs differential thermometry |
+| **3.0 mm** | **3.3 K** | **yes — easy** |
+| **2.5 mm** | **5.7 K** | **yes — easy** |
+| 2.0 mm | 11.0 K | yes |
 
-### A.3 Assembly
+Use `python3 -c "import sys; sys.path.insert(0,'src'); from eclss_gravity.validation_compare import plan_geometry; print(plan_geometry(TARGET_DELTA_T_K))"` to pick your geometry. **A 2–3 mm layer/bore is the sweet spot**: it puts the threshold at 3–11 K, which a $25 thermocouple pair resolves trivially.
 
-1. Mount the clear acrylic/glass tube vertically in a stand or clamp, sealed at the bottom, open (or loosely capped) at the top.
-2. Wrap the lower third of the tube with the resistive heating tape (or submerge the bottom in a small heated water bath — a sous-vide immersion circulator works well and gives precise, stable `ΔT` control if you have one; if not, the heating tape + a simple PID temperature controller is the budget option in the BOM).
-3. Insert one thermocouple near the top of the water column and one near the bottom, both away from the tube wall (mid-radius), connected to a dual-channel or two single-channel digital thermometers.
-4. Fill the tube with room-temperature distilled or filtered water (chlorine-free — tap water dechlorinated 24h in an open container is fine) to a fixed height `H` (record this precisely; it enters the Rayleigh number as `H³`, the most sensitive parameter).
-5. Prepare a small syringe of food-coloring dye (or, for a more quantitative test, 1–5 µm polystyrene microspheres — cheap, available from science-hobbyist suppliers — imaged with a phone camera and simple image-processing script for a semi-quantitative mixing measure).
+### A.2 Design: a control and a measurement
 
-### A.4 Procedure
+Run **both**, in this order. This is what makes the result trustworthy rather than a single ambiguous number:
 
-1. **Compute your target `ΔT_c`** for your actual tube diameter `H` (use it as the height in the vertical convection cell, not the WPA line diameter — this test uses a taller water column for practical bench access, so recompute `Ra_c` via `scripts/run_regime_sweep.py`-style code with your `H`, or ask: `python3 -c "from eclss_gravity import buoyancy, constants; print(buoyancy.critical_delta_T(constants.G_EARTH, constants.water_thermal_expansion(), YOUR_H_METERS, constants.water_kinematic_viscosity(), constants.water_thermal_diffusivity()))"` from the repo's `.venv`).
-2. Let the water column equilibrate to a uniform temperature (both thermocouples within 0.05 K of each other) before each run.
-3. Set the bottom heater to establish a target `ΔT` (bottom warmer than top — this is the destabilizing, convection-favorable orientation the model requires; see the important caveat in §A.5).
-4. Once `ΔT` is stable (both thermocouples steady for 2 minutes), introduce the dye/tracer at the top of the column via the syringe, released gently to minimize injection-induced mixing.
-5. Record (video, or timestamped photos) the tracer's spread for 30 minutes.
-6. Repeat at `ΔT` = 0.5×, 1×, 1.5×, 2×, and 4× your computed `ΔT_c`. **Minimum 3 repetitions per `ΔT` level** for statistical validity (mixing onset can be somewhat stochastic near the threshold).
-7. Reset to a uniform-temperature baseline between every run (drain and refill, or actively mix and re-equilibrate) to avoid residual stratification carrying over.
+- **A-control — shallow plane layer.** A 2–3 mm deep horizontal layer of water in a flat dish, heated uniformly from below. This is *exactly* the geometry `Ra_c = 1708` is derived for, so the classical value should hold. **Purpose: validate your apparatus and technique against textbook physics before trusting it on the open question.** If your control does not reproduce `Ra_c ≈ 1708`, your thermometry or heating uniformity is wrong, and the tube result would be meaningless.
+- **A-measurement — horizontal tube.** A 2–3 mm bore clear tube, water-filled, sealed, horizontal, heated uniformly from below along its length. Same `ΔT` sweep. **Purpose: measure the tube-geometry correction factor** — the ratio of the observed onset `Ra` to 1708. This number is the actual deliverable.
 
-### A.5 Safety
+**Pass/fail criterion, stated as a number before testing:** the control must bracket `Ra_c = 1708` (i.e. the highest no-convection trial and the lowest convection trial must straddle 1708) — if it does not, stop and fix the apparatus. For the tube, report the bracket and the correction ratio. A ratio within `[0.7, 1.4]` means the classical value transfers adequately and the model's Figure 4 conclusion stands as published; a ratio outside `[0.5, 2.0]` means Figure 4's gravity separation must be re-derived with the measured value, per `limitations.md` §4.
 
-- Heating tape/immersion circulator: follow the manufacturer's max-temperature rating; do not exceed ~40°C water temperature (well below any scalding risk, and keeps `β`/`ν`/`α` close to the 25°C values used in the model — see `docs/derivation.md` §6.6 for the ±10% sensitivity over 15–45°C).
-- Standard electrical safety for any heating element near water: use a GFCI-protected outlet, keep all electrical connections away from splash zones, never leave an energized heater unattended.
-- No hazardous chemicals; food-coloring dye and (if used) polystyrene microspheres are non-toxic at these quantities. If you use microspheres, avoid inhaling the dry powder before suspension — wear a basic dust mask when opening the vial.
-- Glass/acrylic tube: handle empty tube carefully (edges), and do not use a tube rated below the small hydrostatic pressure of your column (trivial for any of the tube options in the BOM at these heights).
+### A.3 Bill of materials
 
-### A.6 Data handling
+See `validation/bom.csv`. Total for Part A: **approximately $150** (must-buy items only), entirely consumer/hobbyist-grade, no vendor account or long lead time required.
 
-Record: `ΔT` (K), `H` (m), qualitative mixing onset time (or "no mixing observed in 30 min"), and if using microspheres, image timestamps for a simple pixel-intensity-spread analysis. Save as a CSV with columns `trial, delta_T_K, H_m, mixing_onset_s, notes`. A short analysis script comparing your empirical mixing-onset `ΔT` against the model's `Ra_c=1708` prediction would live at `src/eclss_gravity/validation_compare.py` (not yet written — this is a natural next step for whoever runs this test, using `buoyancy.rayleigh_number` and `buoyancy.critical_delta_T` from the existing package as the comparison target).
+### A.4 Assembly
 
-### A.7 Expected result and interpretation
+1. **Heat source.** Any flat, uniformly-heated surface: a cheap electric hot plate, or (better for low `ΔT` control) a metal plate on top of a water bath fed by an aquarium heater or sous-vide circulator. Uniformity matters more than precision — a hot spot creates a *horizontal* gradient, which convects at any `ΔT` and destroys the measurement (see §A.6).
+2. **A-control cell.** A flat-bottomed dish (a glass petri dish or a small baking dish) on the heated plate. Fill to a measured 2–3 mm depth — measure with calipers or a depth gauge against the dry dish, and record it precisely; it enters as `H³`.
+3. **A-measurement cell.** A 2–3 mm bore clear tube (rigid acrylic/glass preferred over soft silicone, which sags), 100–200 mm long, filled with water, sealed at both ends with no air bubble, laid horizontally in direct contact with the heated plate along its full length.
+4. **Thermometry.** One thermocouple in contact with the heated surface, one in the water near the free/top surface. For the control, a thin thermocouple laid just under the water's top surface works; for the tube, tape one to the top outer wall. You are measuring the *difference*, so identical probes on the same meter cancel most absolute error.
+5. **Tracer.** Fine mica powder, aluminum "glitter" flake, or thymol-blue/food dye. Mica or aluminum flake is strongly preferred: suspended flakes align with shear and make Rayleigh–Bénard convection cells **directly visible** as a characteristic polygonal/roll pattern — an unambiguous, photographable onset signal, far better than watching dye diffuse.
 
-If the model is right: no visible mixing below `ΔT_c`, clear mixing above it, with the transition sharpening as trial count increases. If mixing occurs well below the predicted `ΔT_c`, or fails to occur well above it, that specifically implicates the `Ra_c=1708`-for-an-infinite-plane-layer assumption (`docs/derivation.md` assumption A18, and `docs/redteam_report.md` Finding 2.4's point that a *tube* is not an infinite plane layer — the true critical Rayleigh number for a horizontal-gradient-free vertical cylinder may differ by an O(1) factor). That would be a genuine, reportable, quantitative correction to the model, not just a validation failure.
+### A.5 Procedure
 
----
+1. Compute your predicted `ΔT_c` for your measured `H` (see §A.1's helper command).
+2. Equilibrate: heater off, both thermocouples within 0.1 K, tracer evenly dispersed by gentle stirring, then left to still.
+3. Set the heater to a target `ΔT`, wait for both thermocouples to be steady for 2 minutes.
+4. Observe and record (phone video or timestamped photos) for 30 minutes. Score each trial as **convecting** (visible cell/roll pattern or systematic tracer circulation) or **not convecting** (tracer stays put, only slow diffusive blur).
+5. Sweep `ΔT` at 0.3×, 0.6×, 1×, 1.5×, 2.5×, and 4× your predicted `ΔT_c`. **Minimum 3 repetitions per level** — onset near threshold is genuinely stochastic.
+6. Re-stir and re-equilibrate fully between every trial; residual motion from a previous run is the most common way to get a false positive.
+7. Run the full sweep for the control cell first, confirm it brackets 1708, then repeat for the tube.
+
+### A.6 Safety
+
+- Keep water below ~45 °C: well under any scald risk, and it keeps `β`/`ν`/`α` within ~10% of the 25 °C values the model uses (`docs/derivation.md` §6.6). Low `ΔT` is the regime of interest anyway — you do not need hot water for this.
+- GFCI-protected outlet for any mains heater near water; no energized heater left unattended; keep connections out of splash range.
+- Mica/aluminum flake and food dye are non-toxic in these quantities; avoid inhaling dry powder — wear a dust mask when dispensing, and dispose of rinse water down a normal drain.
+- Glass dishes/tubes: handle cold, inspect for cracks before heating, do not thermally shock (no cold water into a hot dish).
+
+### A.7 Data handling
+
+Record one row per trial: `trial, delta_T_K, H_m, mixing_onset_s, notes`, where `mixing_onset_s` is the time to visible convection or **left empty if no convection was observed**. Keep the control and tube datasets in separate CSVs.
+
+Then run the analysis script (written, tested, and ready — no code needed from you):
+
+```bash
+python3 -m eclss_gravity.validation_compare your_control_data.csv
+python3 -m eclss_gravity.validation_compare your_tube_data.csv
+python3 -m eclss_gravity.validation_compare --self-test   # verifies the script itself on synthetic data
+```
+
+It computes `Ra` for every trial, brackets the empirical threshold between the highest non-convecting and lowest convecting trial, and returns a verdict (`CONSISTENT` / `INCONSISTENT` / `SCATTERED` / `INCONCLUSIVE`) against `Ra_c = 1708`, with guidance for each. `eclss_gravity.validation_compare.tube_geometry_correction(observed_delta_T_c, H)` returns the correction ratio directly.
+
+### A.8 Expected result and interpretation
+
+**Control:** should bracket 1708. If it does not, the apparatus is at fault (most likely a horizontal temperature gradient from non-uniform heating, or residual motion between trials) — fix it before proceeding, because the same fault would silently corrupt the tube measurement.
+
+**Tube:** the honest expected outcome is a correction factor somewhat *above* 1.0 — confinement by the tube walls generally stabilizes against convection, raising the effective `Ra_c` — but the derivation does not predict a specific value, which is exactly why it is worth measuring. Any of these is a real, reportable result:
+
+- **Ratio ≈ 1:** the classical value transfers; `derivation.md` A18's O(1) concern is resolved benignly and Figure 4 stands as published.
+- **Ratio ≳ 2:** Figure 4's three-way gravity separation is not supported; per `limitations.md` §4 the Mars case falls below onset and the result becomes a two-way Earth-vs-rest split. **This would be a genuine correction to a published figure and the most valuable possible outcome of the test.**
+- **`SCATTERED` verdict:** onset is not cleanly threshold-like in a tube, which would itself be worth reporting — it would mean the sharp-switch framing in `derivation.md` §3.5 is the wrong model for tube geometry regardless of where the threshold sits.
+
+A null or inconvenient result here should be reported, not adjusted away; the model's own limitations file already stakes out that a factor-2 discrepancy overturns a figure, so there is no face to lose in finding one.
 
 ## Part B (optional, higher cost/complexity): inclined-clinostat fractional-gravity analog
 
